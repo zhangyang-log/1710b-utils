@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhangtao.mapper.GoodsMapper">
+	<resultMap type="Goods" id="rm">
+		<id column="gid" property="gid" />
+		<result column="num" property="num" />
+		<result column="gname" property="gname" />
+		<result column="ename" property="ename" />
+		<result column="size" property="size" />
+		<result column="biao" property="biao" />
+		<result column="img" property="img" />
+		<result column="price" property="price" />
+		<association property="kind" javaType="Kind">
+			<id column="kid" property="kid" />
+			<result column="kname" property="kname" />
+		</association>
+		<association property="brand" javaType="Brand">
+			<id column="bid" property="bid" />
+			<result column="bname" property="bname" />
+		</association>
+	</resultMap>
+	<select id="queryAllByItem" resultMap="rm" parameterType="map">
+		SELECT
+		* FROM (SELECT g.*,b.bname,k.kname FROM t_goods AS g JOIN
+		t_brand AS
+		b
+		ON b.`bid`=g.`bid` JOIN t_kind AS k ON k.`kid`=g.`kid` ) tt
+		WHERE
+		STATUS=0
+		<if test="gname!=null and gname!=''">
+			and gname like "%${gname}%"
+		</if>
+	</select>
+	<select id="selectOne" resultMap="rm">
+		SELECT
+		* FROM (SELECT
+		g.*,b.bname,k.kname FROM t_goods AS g JOIN
+		t_brand AS
+		b
+		ON
+		b.`bid`=g.`bid` JOIN t_kind AS k ON k.`kid`=g.`kid` ) tt
+		WHERE
+		STATUS=0
+		and gid=#{gid};
+	</select>
+	<update id="dels">
+		update t_goods set status=1 where gid in(${gid});
+	</update>
+	<update id="updGoods" parameterType="Goods">
+		update t_goods set
+		gname=#{gname},ename=#{ename},bid=#{brand.bid},kid=#{kind.kid},size=#{size},price=#{price},num=#{num},biao=#{biao}
+		where gid=#{gid};
+	</update>
+	<select id="selectKind" resultType="Kind">
+		select * from t_kind;
+	</select>
+	<select id="selectBrand" resultType="Brand">
+		select * from t_brand;
+	</select>
+	<insert id="addGoods" parameterType="Goods">
+		insert into
+		t_goods(gname,ename,bid,kid,size,price,num,biao,status)
+		values(#{gname},#{ename},#{brand.bid},#{kind.kid},#{size},#{price},#{num},#{biao},0);
+	</insert>
+
+</mapper>
